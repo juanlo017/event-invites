@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --no-turbopack)",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(npm uninstall *)",
+      "Bash(npm list *)",
+      "Bash(node -e \"const b = require\\('@getbrevo/brevo'\\); console.log\\(Object.keys\\(b\\).slice\\(0,20\\)\\)\")",
+      "Bash(node -e \"const { BrevoClient } = require\\('@getbrevo/brevo'\\); console.log\\(Object.keys\\(BrevoClient.prototype\\).slice\\(0,20\\)\\)\")",
+      "Bash(node -e \"const { BrevoClient } = require\\('@getbrevo/brevo'\\); const c = new BrevoClient\\({ apiKey: 'x' }\\); console.log\\(Object.keys\\(c\\)\\)\")",
+      "Bash(node -e \"const { BrevoClient } = require\\('@getbrevo/brevo'\\); const c = new BrevoClient\\({ apiKey: 'x' }\\); console.log\\(Object.getOwnPropertyNames\\(Object.getPrototypeOf\\(c\\)\\)\\)\")",
+      "Bash(node -e \"const { BrevoClient } = require\\('@getbrevo/brevo'\\); const c = new BrevoClient\\({ apiKey: 'x' }\\); console.log\\(Object.getOwnPropertyNames\\(Object.getPrototypeOf\\(c.transactionalEmails\\(\\)\\)\\)\\)\")",
+      "Bash(node -e \"const { BrevoClient } = require\\('@getbrevo/brevo'\\); const c = new BrevoClient\\({ apiKey: 'x' }\\); const t = c.transactionalEmails; console.log\\(typeof t, t\\)\")"
+    ]
+  }
+}

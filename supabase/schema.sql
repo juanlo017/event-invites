@@ -9,6 +9,7 @@ create table if not exists invitations (
   asistente_principal_nombre text,
   acompanante_nombre         text,
   created_at  timestamptz not null default now(),
+  email        text,
   responded_at timestamptz,
   expires_at  timestamptz not null default '2026-04-24 23:59:59+00'
 );

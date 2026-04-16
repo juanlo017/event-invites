@@ -27,6 +27,7 @@ export default function InvitePage() {
   const [confirmado, setConfirmado] = useState<boolean | null>(null)
   const [principal, setPrincipal] = useState('')
   const [acompanante, setAcompanante] = useState('')
+  const [email, setEmail] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
@@ -49,12 +50,13 @@ export default function InvitePage() {
     setError('')
     if (confirmado === null) { setError('Por favor, elige si asistirás o no.'); return }
     if (confirmado && !principal.trim()) { setError('El nombre del asistente principal es obligatorio.'); return }
+    if (confirmado && !email.trim()) { setError('El correo electrónico es obligatorio para recibir la confirmación.'); return }
 
     setSubmitting(true)
     const res = await fetch('/api/respond', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, confirmado, asistente_principal_nombre: principal, acompanante_nombre: acompanante }),
+      body: JSON.stringify({ token, confirmado, asistente_principal_nombre: principal, acompanante_nombre: acompanante, email }),
     })
     const data = await res.json()
     setSubmitting(false)
@@ -289,6 +291,19 @@ export default function InvitePage() {
                         value={principal}
                         onChange={(e) => setPrincipal(e.target.value)}
                         placeholder="Nombre completo"
+                        className="w-full px-4 py-2.5 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-400 text-stone-800 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-stone-600 mb-1">
+                        Correo electrónico <span className="text-rose-500">*</span>
+                        <span className="text-stone-400 text-xs font-normal ml-1">(recibirás la confirmación aquí)</span>
+                      </label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="tu@email.com"
                         className="w-full px-4 py-2.5 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-400 text-stone-800 text-sm"
                       />
                     </div>

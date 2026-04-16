@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { sendConfirmationEmail } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { token, confirmado, asistente_principal_nombre, acompanante_nombre } = body
+  const { token, confirmado, asistente_principal_nombre, acompanante_nombre, email } = body
 
   if (typeof token !== 'string' || token.trim() === '') {
     return NextResponse.json({ error: 'Token requerido' }, { status: 400 })
@@ -11,7 +12,6 @@ export async function POST(req: NextRequest) {
 
   const db = supabaseAdmin()
 
-  // Fetch invitation
   const { data: invite, error: fetchError } = await db
     .from('invitations')
     .select('*')
@@ -22,12 +22,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invitación no encontrada' }, { status: 404 })
   }
 
-  // Check expiry
   if (new Date(invite.expires_at) < new Date()) {
     return NextResponse.json({ error: 'La invitación ha expirado' }, { status: 410 })
   }
 
-  // Validate
   if (typeof confirmado !== 'boolean') {
     return NextResponse.json({ error: 'Respuesta requerida' }, { status: 400 })
   }
@@ -36,11 +34,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'El nombre del asistente principal es obligatorio' }, { status: 400 })
   }
 
+  const cleanEmail = typeof email === 'string' && email.trim() ? email.trim().toLowerCase() : null
+
   const updateData: Record<string, unknown> = {
     confirmado,
     responded_at: new Date().toISOString(),
     asistente_principal_nombre: confirmado ? asistente_principal_nombre.trim() : null,
     acompanante_nombre: confirmado && acompanante_nombre?.trim() ? acompanante_nombre.trim() : null,
+    email: cleanEmail,
   }
 
   const { error: updateError } = await db
@@ -50,6 +51,20 @@ export async function POST(req: NextRequest) {
 
   if (updateError) {
     return NextResponse.json({ error: 'Error al guardar la respuesta' }, { status: 500 })
+  }
+
+  // Send confirmation email if accepted and email provided
+  if (confirmado && cleanEmail) {
+    try {
+      await sendConfirmationEmail({
+        to: cleanEmail,
+        principal: asistente_principal_nombre.trim(),
+        acompanante: acompanante_nombre?.trim() || null,
+      })
+    } catch (err) {
+      // Email failure is non-fatal — response is already saved
+      console.error('Email send failed:', err)
+    }
   }
 
   return NextResponse.json({ success: true })

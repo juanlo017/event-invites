@@ -7,6 +7,7 @@ export type Invitation = {
   confirmado: boolean | null
   asistente_principal_nombre: string | null
   acompanante_nombre: string | null
+  email: string | null
   created_at: string
   responded_at: string | null
   expires_at: string
