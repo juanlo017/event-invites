@@ -160,6 +160,7 @@ export default function InvitePage() {
             <Badge icon="🕐">5 horas</Badge>
             <Badge icon="👤">En persona</Badge>
             <Badge icon="🅿️">Aparcamiento de pago</Badge>
+            <Badge icon="🎟️">Gratis</Badge>
           </div>
           <div className="mt-4 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
             <span className="text-amber-500 text-lg mt-0.5">👔</span>

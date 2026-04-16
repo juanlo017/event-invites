@@ -11,10 +11,12 @@ export async function sendConfirmationEmail({
   to,
   principal,
   acompanante,
+  token,
 }: {
   to: string
   principal: string
   acompanante?: string | null
+  token: string
 }) {
   const client = new BrevoClient({ apiKey: process.env.BREVO_API_KEY! })
 
@@ -124,9 +126,20 @@ export async function sendConfirmationEmail({
         </tr>
       </table>
 
-      <p style="margin:0;color:#a8a29e;font-size:13px;line-height:1.7;font-style:italic;text-align:center;">
+      <p style="margin:0 0 24px;color:#a8a29e;font-size:13px;line-height:1.7;font-style:italic;text-align:center;">
         "Siete décadas de trayectoria, crecimiento y compromiso compartido."
       </p>
+
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td align="center">
+            <a href="${APP_URL}/invite/${token}"
+               style="display:inline-block;background:#1c1917;color:#ffffff;text-decoration:none;border-radius:999px;padding:12px 28px;font-size:13px;font-family:Arial,sans-serif;font-weight:600;letter-spacing:0.03em;">
+              Ver mi invitación →
+            </a>
+          </td>
+        </tr>
+      </table>
     </td>
   </tr>
 

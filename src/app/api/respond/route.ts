@@ -60,6 +60,7 @@ export async function POST(req: NextRequest) {
         to: cleanEmail,
         principal: asistente_principal_nombre.trim(),
         acompanante: acompanante_nombre?.trim() || null,
+        token,
       })
     } catch (err) {
       // Email failure is non-fatal — response is already saved
