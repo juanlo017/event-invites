@@ -1,5 +1,24 @@
 import { createClient } from '@supabase/supabase-js'
 
+export type GroupInvitation = {
+  id: string
+  token: string
+  label: string
+  capacity: number
+  expires_at: string
+  created_at: string
+  registrations?: GroupRegistration[]
+}
+
+export type GroupRegistration = {
+  id: string
+  group_id: string
+  nombre: string
+  acompanante_nombre: string | null
+  email: string | null
+  registered_at: string
+}
+
 export type Invitation = {
   id: string
   token: string
