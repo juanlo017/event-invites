@@ -28,6 +28,7 @@ export default function InvitePage() {
   const [principal, setPrincipal] = useState('')
   const [acompanante, setAcompanante] = useState('')
   const [email, setEmail] = useState('')
+  const [privacidad, setPrivacidad] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
@@ -51,6 +52,7 @@ export default function InvitePage() {
     if (confirmado === null) { setError('Por favor, elige si asistirás o no.'); return }
     if (confirmado && !principal.trim()) { setError('El nombre del asistente principal es obligatorio.'); return }
     if (confirmado && !email.trim()) { setError('El correo electrónico es obligatorio para recibir la confirmación.'); return }
+    if (confirmado && !privacidad) { setError('Debes aceptar la política de privacidad para continuar.'); return }
 
     setSubmitting(true)
     const res = await fetch('/api/respond', {
@@ -327,13 +329,32 @@ export default function InvitePage() {
                   </div>
                 )}
 
+                {confirmado === true && (
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={privacidad}
+                      onChange={(e) => setPrivacidad(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 accent-stone-800 shrink-0"
+                    />
+                    <span className="text-xs text-stone-500 leading-relaxed">
+                      He leído y acepto la{' '}
+                      <a href="/privacidad" target="_blank"
+                        className="underline text-stone-700 hover:text-stone-900">
+                        política de privacidad
+                      </a>
+                      . Consiento el tratamiento de mis datos para la gestión de este evento.
+                    </span>
+                  </label>
+                )}
+
                 {error && <p className="text-rose-500 text-sm">{error}</p>}
 
                 {confirmado !== null && (
                   <button
                     type="submit"
-                    disabled={submitting}
-                    className="w-full py-3 bg-stone-800 hover:bg-stone-700 disabled:opacity-60 text-white font-medium rounded-xl transition-colors text-sm"
+                    disabled={submitting || !privacidad}
+                    className="w-full py-3 text-white font-medium rounded-xl transition-colors text-sm disabled:cursor-not-allowed bg-stone-800 hover:bg-stone-700 disabled:bg-stone-300 disabled:text-stone-400"
                   >
                     {submitting ? 'Enviando…' : 'Confirmar respuesta'}
                   </button>

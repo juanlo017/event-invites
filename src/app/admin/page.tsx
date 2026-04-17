@@ -202,7 +202,12 @@ export default function AdminPage() {
     })
     .filter((inv) => {
       if (!companionSearch.trim()) return true
-      return (inv.acompanante_nombre ?? '').toLowerCase().includes(companionSearch.trim().toLowerCase())
+      const q = companionSearch.trim().toLowerCase()
+      return (
+        (inv.label ?? '').toLowerCase().includes(q) ||
+        (inv.asistente_principal_nombre ?? '').toLowerCase().includes(q) ||
+        (inv.acompanante_nombre ?? '').toLowerCase().includes(q)
+      )
     })
     .sort((a, b) => {
       let av: string | number | null = null
@@ -389,7 +394,7 @@ export default function AdminPage() {
                 type="text"
                 value={companionSearch}
                 onChange={(e) => setCompanionSearch(e.target.value)}
-                placeholder="Filtrar por nombre de acompañante…"
+                placeholder="Buscar por invitado, asistente o acompañante…"
                 className="w-64 px-3 py-1.5 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-400 text-stone-700"
               />
               {companionSearch && (

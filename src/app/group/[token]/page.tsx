@@ -32,6 +32,7 @@ export default function GroupPage() {
   const [nombre, setNombre] = useState('')
   const [acompanante, setAcompanante] = useState('')
   const [email, setEmail] = useState('')
+  const [privacidad, setPrivacidad] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
@@ -50,6 +51,7 @@ export default function GroupPage() {
     setError('')
     if (!nombre.trim()) { setError('El nombre es obligatorio.'); return }
     if (!email.trim()) { setError('El correo electrónico es obligatorio.'); return }
+    if (!privacidad) { setError('Debes aceptar la política de privacidad para continuar.'); return }
 
     setSubmitting(true)
     const res = await fetch(`/api/group/${token}/register`, {
@@ -257,9 +259,21 @@ export default function GroupPage() {
                   <span>⚠️</span> Una vez confirmado no podrás modificar el nombre del acompañante.
                 </p>
               </div>
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input type="checkbox" checked={privacidad} onChange={(e) => setPrivacidad(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-stone-800 shrink-0" />
+                <span className="text-xs text-stone-500 leading-relaxed">
+                  He leído y acepto la{' '}
+                  <a href="/privacidad" target="_blank" className="underline text-stone-700 hover:text-stone-900">
+                    política de privacidad
+                  </a>
+                  . Consiento el tratamiento de mis datos para la gestión de este evento.
+                </span>
+              </label>
+
               {error && <p className="text-rose-500 text-sm">{error}</p>}
-              <button type="submit" disabled={submitting}
-                className="w-full py-3 bg-stone-800 hover:bg-stone-700 disabled:opacity-60 text-white font-medium rounded-xl transition-colors text-sm">
+              <button type="submit" disabled={submitting || !privacidad}
+                className="w-full py-3 text-white font-medium rounded-xl transition-colors text-sm disabled:cursor-not-allowed bg-stone-800 hover:bg-stone-700 disabled:bg-stone-300 disabled:text-stone-400">
                 {submitting ? 'Registrando…' : 'Confirmar asistencia'}
               </button>
             </form>
