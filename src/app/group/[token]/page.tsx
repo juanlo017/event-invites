@@ -16,10 +16,12 @@ type GroupData = {
 }
 
 const AGENDA = [
-  { time: '10:30 – 11:00', title: 'Recepción y Bienvenida' },
+  { time: '10:30', title: 'Recepción y Bienvenida' },
   { time: '11:00', title: 'Apertura Institucional' },
-  { time: '13:30', title: 'Clausura y Foto Familiar' },
-  { time: '14:00', title: 'Cóctel' },
+  { time: '13:00', title: 'Cierre Institucional (Consejero de Industria, Energía y Minas de la Junta de Andalucía)' },
+  { time: '13:15', title: 'Visita Museo Nao Victoria y Foto familiar' },
+  { time: '13:30', title: 'Cóctel' },
+  { time: '15:00', title: 'Finalización del evento' },
 ]
 
 export default function GroupPage() {

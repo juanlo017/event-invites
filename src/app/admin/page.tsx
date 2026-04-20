@@ -7,6 +7,18 @@ type Tab = 'individual' | 'group'
 
 const ADMIN_PASSWORD_KEY = 'admin_pw'
 
+function downloadCsv(url: string, filename: string, auth: string) {
+  fetch(url, { headers: { 'x-admin-password': auth } })
+    .then((r) => r.blob())
+    .then((blob) => {
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = filename
+      a.click()
+      URL.revokeObjectURL(a.href)
+    })
+}
+
 type Filter = 'all' | 'pending' | 'accepted' | 'rejected'
 type SortCol = 'label' | 'confirmado' | 'asistente_principal_nombre' | 'acompanante_nombre' | 'responded_at'
 type SortDir = 'asc' | 'desc'
@@ -178,19 +190,11 @@ export default function AdminPage() {
   }
 
   function handleExport() {
-    const url = `/api/admin/export`
-    const a = document.createElement('a')
-    a.href = url
-    a.setAttribute('download', 'asistentes.csv')
-    // Send auth header via fetch then download blob
-    fetch(url, { headers: { 'x-admin-password': auth } })
-      .then((r) => r.blob())
-      .then((blob) => {
-        const blobUrl = URL.createObjectURL(blob)
-        a.href = blobUrl
-        a.click()
-        URL.revokeObjectURL(blobUrl)
-      })
+    downloadCsv('/api/admin/export', 'asistentes.csv', auth)
+  }
+
+  function handleExportGroups() {
+    downloadCsv('/api/admin/export-groups', 'asistentes_grupales.csv', auth)
   }
 
   const filtered = invitations
@@ -260,20 +264,12 @@ export default function AdminPage() {
     <div className="min-h-screen bg-stone-50">
       <header className="bg-stone-800 text-white px-6 py-4 flex items-center justify-between">
         <h1 className="text-lg font-semibold">Panel de Invitaciones</h1>
-        <div className="flex gap-3">
-          <button
-            onClick={handleExport}
-            className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm rounded-lg font-medium transition-colors"
-          >
-            Exportar CSV
-          </button>
-          <button
-            onClick={() => { setAuth(''); sessionStorage.removeItem(ADMIN_PASSWORD_KEY) }}
-            className="px-4 py-1.5 bg-stone-600 hover:bg-stone-500 text-white text-sm rounded-lg transition-colors"
-          >
-            Salir
-          </button>
-        </div>
+        <button
+          onClick={() => { setAuth(''); sessionStorage.removeItem(ADMIN_PASSWORD_KEY) }}
+          className="px-4 py-1.5 bg-stone-600 hover:bg-stone-500 text-white text-sm rounded-lg transition-colors"
+        >
+          Salir
+        </button>
       </header>
 
       {/* Tabs */}
@@ -308,6 +304,7 @@ export default function AdminPage() {
             onDelete={handleDeleteGroup}
             onCopy={copyGroupLink}
             onRefresh={() => fetchGroupInvites(auth)}
+            onExport={handleExportGroups}
           />
         ) : (<>
 
@@ -378,6 +375,12 @@ export default function AdminPage() {
               <div className="flex items-center gap-3">
                 {loading && <span className="text-xs text-stone-400">Actualizando…</span>}
                 <button
+                  onClick={handleExport}
+                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs rounded-lg font-medium transition-colors"
+                >
+                  Exportar CSV
+                </button>
+                <button
                   onClick={() => fetchInvites(auth)}
                   title="Recargar"
                   className="text-stone-400 hover:text-stone-700 transition-colors"
@@ -413,12 +416,12 @@ export default function AdminPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-stone-50 border-b border-stone-100">
+                <thead className="bg-sky-50 border-b border-sky-100">
                   <tr>
                     <SortTh col="label" current={sortCol} dir={sortDir} onSort={toggleSort}>Invitado</SortTh>
                     <SortTh col="confirmado" current={sortCol} dir={sortDir} onSort={toggleSort}>Estado</SortTh>
-                    <SortTh col="asistente_principal_nombre" current={sortCol} dir={sortDir} onSort={toggleSort}>Asistente principal</SortTh>
-                    <SortTh col="acompanante_nombre" current={sortCol} dir={sortDir} onSort={toggleSort}>Acompañante</SortTh>
+                    <SortTh col="asistente_principal_nombre" current={sortCol} dir={sortDir} onSort={toggleSort} className="min-w-[180px]">Asistente principal</SortTh>
+                    <SortTh col="acompanante_nombre" current={sortCol} dir={sortDir} onSort={toggleSort} className="min-w-[180px]">Acompañante</SortTh>
                     <SortTh col="responded_at" current={sortCol} dir={sortDir} onSort={toggleSort}>Respondido</SortTh>
                     <th className="px-4 py-3" />
                   </tr>
@@ -472,7 +475,7 @@ export default function AdminPage() {
 function GroupPanel({
   auth, baseUrl, groupInvites, groupLabel, setGroupLabel, groupCapacity, setGroupCapacity,
   creatingGroup, groupError, expandedGroup, setExpandedGroup, groupCopyId,
-  onSubmit, onDelete, onCopy, onRefresh,
+  onSubmit, onDelete, onCopy, onRefresh, onExport,
 }: {
   auth: string
   baseUrl: string
@@ -490,6 +493,7 @@ function GroupPanel({
   onDelete: (id: string) => void
   onCopy: (token: string, id: string) => void
   onRefresh: () => void
+  onExport: () => void
 }) {
   return (
     <div className="space-y-6">
@@ -519,6 +523,11 @@ function GroupPanel({
       <section className="bg-white rounded-2xl shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-stone-100 flex items-center justify-between">
           <h2 className="font-semibold text-stone-700">Invitaciones grupales</h2>
+          <div className="flex items-center gap-3">
+          <button onClick={onExport}
+            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs rounded-lg font-medium transition-colors">
+            Exportar CSV
+          </button>
           <button onClick={onRefresh} title="Recargar"
             className="text-stone-400 hover:text-stone-700 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none"
@@ -527,6 +536,7 @@ function GroupPanel({
               <path d="M3 3v5h5"/>
             </svg>
           </button>
+          </div>
         </div>
 
         {groupInvites.length === 0 ? (
@@ -573,7 +583,7 @@ function GroupPanel({
                       ) : (
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="text-left text-xs text-stone-400 uppercase tracking-wide">
+                            <tr className="text-left text-xs text-sky-600 uppercase tracking-wide bg-sky-50">
                               <th className="pb-2 font-medium">Nombre</th>
                               <th className="pb-2 font-medium">Acompañante</th>
                               <th className="pb-2 font-medium">Email</th>
@@ -607,18 +617,19 @@ function GroupPanel({
 }
 
 function SortTh({
-  col, current, dir, onSort, children,
+  col, current, dir, onSort, children, className,
 }: {
   col: SortCol
   current: SortCol
   dir: SortDir
   onSort: (col: SortCol) => void
   children: React.ReactNode
+  className?: string
 }) {
   const active = col === current
   return (
     <th
-      className="text-left px-4 py-3 text-stone-500 font-medium cursor-pointer select-none hover:text-stone-800 whitespace-nowrap"
+      className={`text-left px-4 py-3 text-sky-700 font-medium cursor-pointer select-none hover:text-sky-900 whitespace-nowrap${className ? ` ${className}` : ''}`}
       onClick={() => onSort(col)}
     >
       <span className="inline-flex items-center gap-1">

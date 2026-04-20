@@ -22,16 +22,23 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  const header = 'Asistente principal,Acompañante\n'
-  const rows = (data ?? [])
-    .map((r) => {
+  const extractedAt = new Date().toLocaleDateString('es-ES', {
+    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  })
+
+  const lines: string[] = [
+    `"Datos extraídos: ${extractedAt}"`,
+    '',
+    '"Asistente principal","Acompañante"',
+    ...(data ?? []).map((r) => {
       const principal = `"${(r.asistente_principal_nombre ?? '').replace(/"/g, '""')}"`
       const companion = `"${(r.acompanante_nombre ?? '').replace(/"/g, '""')}"`
       return `${principal},${companion}`
-    })
-    .join('\n')
+    }),
+  ]
 
-  const csv = header + rows
+  const csv = '\uFEFF' + lines.join('\n')
 
   return new NextResponse(csv, {
     headers: {
