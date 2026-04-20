@@ -7,6 +7,15 @@ function checkAuth(req: NextRequest) {
   return auth === process.env.ADMIN_PASSWORD
 }
 
+function safeExpiresAt(): string {
+  const raw = (process.env.NEXT_PUBLIC_EVENT_EXPIRES ?? '').replace(/"/g, '').trim()
+  if (raw) {
+    const d = new Date(`${raw}T23:59:59Z`)
+    if (!isNaN(d.getTime())) return d.toISOString()
+  }
+  return new Date('2026-04-29T23:59:59Z').toISOString()
+}
+
 // GET /api/admin/invites — list all invitations
 export async function GET(req: NextRequest) {
   if (!checkAuth(req)) {
@@ -39,9 +48,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Se requiere un listado de invitados' }, { status: 400 })
   }
 
-  const expiresAt = process.env.NEXT_PUBLIC_EVENT_EXPIRES
-    ? new Date(`${process.env.NEXT_PUBLIC_EVENT_EXPIRES}T23:59:59Z`).toISOString()
-    : new Date('2026-04-24T23:59:59Z').toISOString()
+  const expiresAt = safeExpiresAt()
 
   const rows = labels
     .map((l) => l.trim())

@@ -25,9 +25,11 @@ export async function POST(req: NextRequest) {
   const { label, capacity } = await req.json()
   if (!label?.trim()) return NextResponse.json({ error: 'Label requerido' }, { status: 400 })
 
-  const expiresAt = process.env.NEXT_PUBLIC_EVENT_EXPIRES
-    ? new Date(`${process.env.NEXT_PUBLIC_EVENT_EXPIRES}T23:59:59Z`).toISOString()
-    : new Date('2026-04-24T23:59:59Z').toISOString()
+  const raw = (process.env.NEXT_PUBLIC_EVENT_EXPIRES ?? '').replace(/"/g, '').trim()
+  const expiresDate = raw ? new Date(`${raw}T23:59:59Z`) : null
+  const expiresAt = expiresDate && !isNaN(expiresDate.getTime())
+    ? expiresDate.toISOString()
+    : new Date('2026-04-29T23:59:59Z').toISOString()
 
   const db = supabaseAdmin()
   const { data, error } = await db
